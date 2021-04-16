@@ -16,6 +16,7 @@ public class Solution {
     private int yHead; //Координата Y головы своей змеи
     private Helper helper;
     private ArrayList<Snake> enemies; //Список змей противников
+    private int distanceToEnemy; //Дистанция до ближайшего соперника
 
     /**
      * Конструктор класса
@@ -54,10 +55,11 @@ public class Solution {
     }
 
     /**
-     * Печать информации о текущих свойствах объектов
+     * Печать информации о текущих характеристик объектов
      */
     private void printInfo() {
         System.out.println("Size = " + mySnake.getSize());
+        System.out.println("Max size of enemy = " + helper.getMaxSizeOfEnemy(enemies));
         System.out.println("Steps with fury = " + mySnake.getActOfPillFury());
         System.out.println("Steps with fly = " + mySnake.getActOfPillFly());
         System.out.println("Direction = " + mySnake.getHeadDirection());
@@ -69,45 +71,87 @@ public class Solution {
      * Значение направления передается в объект mySnake
      */
     private void doChoice() {
-        //Запрос размера змеи и максимального размера среди противников
-        int maxSizeOfEnemy = helper.getMaxSizeOfEnemy(enemies);
-        int mySize = mySnake.getSize();
+        GoalPoint dFury = helper.searchNearestElement(mySnake, Elements.FURY_PILL);
+        GoalPoint dFly = helper.searchNearestElement(mySnake, Elements.FLYING_PILL);
+        GoalPoint dApple = helper.searchNearestElement(mySnake, Elements.APPLE);
+        GoalPoint dGold = helper.searchNearestElement(mySnake, Elements.GOLD);
+        GoalPoint dStone = helper.searchNearestElement(mySnake, Elements.STONE);
+        GoalPoint dEnemy = helper.searchNearestElement(mySnake, Helper.ENEMY_FULL);
 
-        GoalPoint dFury = helper.searchNearestElement(xHead, yHead, Elements.FURY_PILL);
-        GoalPoint dFly = helper.searchNearestElement(xHead, yHead, Elements.FLYING_PILL);
-        GoalPoint dApple = helper.searchNearestElement(xHead, yHead, Elements.APPLE);
-        GoalPoint dGold = helper.searchNearestElement(xHead, yHead, Elements.GOLD);
-        GoalPoint dStone = helper.searchNearestElement(xHead, yHead, Elements.STONE);
-        GoalPoint dEnemy = helper.searchNearestElement(xHead, yHead, Helper.ENEMY_FULL);
+        if (checkOpportunityEat(dEnemy)) { //Если есть возможность съесть змею противника
+            mySnake.setHeadDirection(dEnemy.getFirstStep()); //Идем к змее противника
 
-        if (dApple.getDistance() == 0 && dGold.getDistance() == 0 && dFury.getDistance() == 0 &&
-                dFly.getDistance() == 0) {//Тупик
-            if (dStone.getDistance() != 0 && (mySnake.isFury() && dStone.getDistance() < mySnake.getActOfPillFury() ||
-                    mySnake.isFly() && dStone.getDistance() < mySnake.getActOfPillFly() ||
-                    mySize >= 5))//Если есть камень и есть возможность к нему идти
-                mySnake.setHeadDirection(dStone.getFirstStep());
-            else
-                checkNextCell();//Обходим препятствие
         } else {
-            if (dFury.getDistance() != 0 && (dFury.getDistance() <= 5 || (dFury.getDistance() <= dApple.getDistance() &&
-                    dFury.getDistance() <= dGold.getDistance())))//Если пилюля ярости ближе чем 5 клеток или ближе чем яблоко и золото
-                mySnake.setHeadDirection(dFury.getFirstStep()); //Идем к пилюле
-            else {
-                if (mySnake.isFury() && dEnemy.getDistance() < mySnake.getActOfPillFury())//Если мы под яростью и есть тело змеи рядом
-                    mySnake.setHeadDirection(dEnemy.getFirstStep());//Двигаемся в сторону тела противника
-                else {
-                    if (dApple.getDistance() * 2 < dGold.getDistance()
-                            || dGold.getDistance() == 0)//Если поблизости нет золота
-                        if ((mySnake.isFury() && mySnake.getActOfPillFury() > dStone.getDistance()) ||
-                                mySize > maxSizeOfEnemy + 5)
-                            mySnake.setHeadDirection(dStone.getFirstStep());
-                        else
-                            mySnake.setHeadDirection(dApple.getFirstStep());//Идем к яблоку
-                    else
-                        mySnake.setHeadDirection(dGold.getFirstStep());//Идем к золоту
+            if (dStone.getDistance() != 0 && !helper.isDeadEnd(dStone, mySnake, enemies) && helper.checkHeadEnemy(dStone, mySnake, enemies)
+                    && checkOpportunityStone(dStone) && //Если есть возможность съесть камень
+                    (dStone.getDistance() * 1.5 < dGold.getDistance() || dGold.getDistance() == 0) && //Он ближе чем золото
+                    (dStone.getDistance() * 2 < dFly.getDistance() || dFly.getDistance() == 0) && //Он ближе чем полет
+                    (dStone.getDistance() * 2 < dFury.getDistance() || dFury.getDistance() == 0 && //Он ближе чем ярость
+                            (dStone.getDistance() < dApple.getDistance() * 3 || dApple.getDistance() == 0))) { //Не дальше чем яблоко в 3 раз
+                mySnake.setHeadDirection(dStone.getFirstStep()); //Идем к камню
+
+            } else {
+                if (dFury.getDistance() != 0 && !helper.isDeadEnd(dFury, mySnake, enemies) && helper.checkHeadEnemy(dFury, mySnake, enemies) &&
+                        (dFury.getDistance() <= 5 || ( //Если ярость в радиусе 5 клеток
+                                (dFury.getDistance() < dFly.getDistance() * 1.5 || dFly.getDistance() == 0) && //Если не дальше полета в 1,5 раза
+                                        (dFury.getDistance() * 1.5 < dGold.getDistance() || dGold.getDistance() == 0) && //Ближе золота
+                                        (dFury.getDistance() < dApple.getDistance() * 2 || dApple.getDistance() == 0)))) { //Ближе яблока
+                    mySnake.setHeadDirection(dFury.getFirstStep());//Идем к пилюле ярости
+
+                } else {
+                    if (dFly.getDistance() != 0 && !helper.isDeadEnd(dFly, mySnake, enemies) &&
+                            helper.checkHeadEnemy(dFly, mySnake, enemies) && //Проверка пилюли полета
+                            (dFly.getDistance() * 1.5 < dGold.getDistance() || dGold.getDistance() == 0) && //Если ближе золота
+                            (dFly.getDistance() < dApple.getDistance() * 1.5 || dApple.getDistance() == 0)) { //Не дальше чем яблоко в 1,5 раз
+                        mySnake.setHeadDirection(dFly.getFirstStep());//Идем к пилюле полета
+
+                    } else {
+                        if (dGold.getDistance() != 0 && !helper.isDeadEnd(dGold, mySnake, enemies) &&
+                                helper.checkHeadEnemy(dGold, mySnake, enemies) && //Проверка золота
+                                (dGold.getDistance() < dApple.getDistance() * 2)) { //Если золото ближе яблока
+                            mySnake.setHeadDirection(dGold.getFirstStep());//Идем к золоту
+
+                        } else {
+                            if (dApple.getDistance() != 0 && !helper.isDeadEnd(dApple, mySnake, enemies) &&
+                                    helper.checkHeadEnemy(dApple, mySnake, enemies)) { //Если есть яблоко
+                                mySnake.setHeadDirection(dApple.getFirstStep());//Идем к яблоку
+
+                            } else { //Если безопасных путей к полезным клеткам нет
+                                checkNextCell(); //Проверяем следующую клетку и, при необходимости, обходим препятствие
+                            }
+                        }
+                    }
                 }
             }
         }
+
+        distanceToEnemy = dEnemy.getDistance();
+    }
+
+    /**
+     * Проверка возможности съесть противника
+     *
+     * @param dEnemy Точка с противником
+     * @return Результат проверки: True - возможность есть, False - возможности нет
+     */
+    private boolean checkOpportunityEat(GoalPoint dEnemy) {
+        return mySnake.isFury &&
+                !helper.getSnakeByPoint(enemies, dEnemy.getGoal()).isFury() &&
+                dEnemy.getDistance() < mySnake.getActOfPillFury() &&
+                dEnemy.getDistance() != distanceToEnemy;
+    }
+
+    /**
+     * Проверка возможности съесть камень
+     *
+     * @param dStone Точка с камнем
+     * @return Результат проверки: True - возможность есть, False - возможности нет
+     */
+    private boolean checkOpportunityStone(GoalPoint dStone) {
+        int maxSizeOfEnemy = helper.getMaxSizeOfEnemy(enemies);
+        int mySize = mySnake.getSize();
+        return mySnake.isFury() && mySnake.getActOfPillFury() > dStone.getDistance() ||
+                mySize > maxSizeOfEnemy + 6;
     }
 
     /**
@@ -205,6 +249,4 @@ public class Solution {
             }
         }
     }
-
-
 }

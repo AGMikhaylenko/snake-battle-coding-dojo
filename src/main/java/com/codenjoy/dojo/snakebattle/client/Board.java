@@ -68,15 +68,4 @@ public class Board extends AbstractBoard<Elements> {
         return get(HEAD_DOWN, HEAD_LEFT, HEAD_RIGHT, HEAD_UP, HEAD_SLEEP, HEAD_EVIL, HEAD_FLY);
     }
 
-    public boolean isStoneAt(int x, int y) {
-        return isAt(x, y, STONE);
-    }
-
-    public boolean isAppleAt(int x, int y) {
-        return isAt(x, y, APPLE);
-    }
-
-    public boolean isGoldAt(int x, int y) {
-        return isAt(x, y, GOLD);
-    }
 }

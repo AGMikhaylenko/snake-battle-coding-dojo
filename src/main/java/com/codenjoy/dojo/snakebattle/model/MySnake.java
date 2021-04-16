@@ -15,6 +15,7 @@ public class MySnake extends Snake {
 
     /**
      * Конструктор класса
+     *
      * @param body Список точек, составляющих тело змеи
      */
     public MySnake(ArrayList<Point> body) {
@@ -26,6 +27,7 @@ public class MySnake extends Snake {
 
     /**
      * Обновление значений полей змеи
+     *
      * @param nextElement Следующий элемент по ходу движения
      */
     public void update(Elements nextElement) {
@@ -44,6 +46,28 @@ public class MySnake extends Snake {
                 isFury = true;
                 actOfPillFury = 10;
                 break;
+        }
+    }
+
+    /**
+     * Сравнение сил с другой змеей
+     *
+     * @param enemy Вторая змея (противник)
+     * @return Возможные значения: объект сильнее другой змеи - >0, другая змея сильнее - <0, силы равны = 0
+     */
+    public int compareTo(Snake enemy) {
+        if (this.isFury) {
+            if (enemy.isFury) {
+                return this.getSize() - enemy.getSize() - 1;
+            } else {
+                return 1;
+            }
+        } else {
+            if (enemy.isFury) {
+                return -1;
+            } else {
+                return this.getSize() - enemy.getSize() - 1;
+            }
         }
     }
 
@@ -66,4 +90,5 @@ public class MySnake extends Snake {
     public void setBody(ArrayList<Point> body) {
         this.body = body;
     }
+
 }

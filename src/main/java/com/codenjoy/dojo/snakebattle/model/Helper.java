@@ -19,7 +19,7 @@ public class Helper {
     public final static Elements[] ENEMY_BODY = {Elements.ENEMY_BODY_HORIZONTAL, Elements.ENEMY_BODY_VERTICAL,
             Elements.ENEMY_BODY_LEFT_DOWN, Elements.ENEMY_BODY_LEFT_UP, Elements.ENEMY_BODY_RIGHT_DOWN,
             Elements.ENEMY_BODY_RIGHT_UP, Elements.ENEMY_TAIL_END_DOWN, Elements.ENEMY_TAIL_END_LEFT,
-            Elements.ENEMY_TAIL_END_UP, Elements.ENEMY_TAIL_END_RIGHT};
+            Elements.ENEMY_TAIL_END_UP, Elements.ENEMY_TAIL_END_RIGHT, Elements.ENEMY_TAIL_INACTIVE};
 
     public final static Elements[] ENEMY_HEAD = {Elements.ENEMY_HEAD_DOWN, Elements.ENEMY_HEAD_LEFT,
             Elements.ENEMY_HEAD_RIGHT, Elements.ENEMY_HEAD_UP, Elements.ENEMY_HEAD_DEAD, Elements.ENEMY_HEAD_EVIL,
@@ -30,11 +30,14 @@ public class Helper {
             Elements.ENEMY_BODY_RIGHT_UP, Elements.ENEMY_TAIL_END_DOWN, Elements.ENEMY_TAIL_END_LEFT,
             Elements.ENEMY_TAIL_END_UP, Elements.ENEMY_TAIL_END_RIGHT, Elements.ENEMY_HEAD_DOWN, Elements.ENEMY_HEAD_LEFT,
             Elements.ENEMY_HEAD_RIGHT, Elements.ENEMY_HEAD_UP, Elements.ENEMY_HEAD_DEAD, Elements.ENEMY_HEAD_EVIL,
-            Elements.ENEMY_HEAD_FLY};
+            Elements.ENEMY_HEAD_FLY, Elements.ENEMY_TAIL_INACTIVE};
 
     private Board board;
     private final int sizeOfBoardX; //Ширина игрового поля
     private final int sizeOfBoardY; //Высота игрового поля
+
+    final int[] dx = {1, -1, 0, 0};//Вспомогательный массив для расчета соседних точек
+    final int[] dy = {0, 0, 1, -1};//Вспомогательный массив для расчета соседних точек
 
     /**
      * Конструктор класса
@@ -108,24 +111,41 @@ public class Helper {
         temp[xHead][yHead] = 1;
 
         ArrayList<Point> body = new ArrayList<>();
+        ArrayList<Point> queue = new ArrayList<>();
         body.add(new Point(xHead, yHead));
-        int[] dx = {1, -1, 0, 0};
-        int[] dy = {0, 0, 1, -1};
-        boolean isEndOfBody = false;
-        while (!isEndOfBody) {
-            Point tempPoint = body.get(body.size() - 1);
+        queue.add(new Point(xHead, yHead));
+//        int[] dx = {1, -1, 0, 0};
+//        int[] dy = {0, 0, 1, -1};
+
+        while (!queue.isEmpty()) {
+            Point tempPoint = queue.remove(0);
             for (int i = 0; i < dx.length; i++) {
-                if (board.isAt(tempPoint.x + dx[i], tempPoint.y + dy[i], ENEMY_BODY) &&
+                if (board.isAt(tempPoint.x + dx[i], tempPoint.y + dy[i], ENEMY_FULL) &&
                         temp[tempPoint.x + dx[i]][tempPoint.y + dy[i]] == 0) {
                     temp[tempPoint.x + dx[i]][tempPoint.y + dy[i]] = 1;
                     body.add(new Point(tempPoint.x + dx[i], tempPoint.y + dy[i]));
-                    break;
+                    queue.add(new Point(tempPoint.x + dx[i], tempPoint.y + dy[i]));
                 }
             }
-            if (tempPoint.equals(body.get(body.size() - 1)))
-                isEndOfBody = true;
         }
         return body;
+    }
+
+    /**
+     * Определение змеи по точке на игровом поле
+     *
+     * @param snakes Список змей
+     * @param point  Точка на игровом поле
+     * @return Змея, которой принадлежит точка. Если точка не принадлежит ни одной из змей,
+     * то возвращается змея с пустым телом
+     */
+    public Snake getSnakeByPoint(ArrayList<Snake> snakes, Point point) {
+        for (Snake s : snakes) {
+            for (Point p : s.getBody())
+                if (p.equals(point))
+                    return s;
+        }
+        return new Snake();
     }
 
     /**
@@ -133,17 +153,17 @@ public class Helper {
      * Проверка наличия пути до необходимого элемента.
      * Поиск основан на волновом алгоритме
      *
-     * @param xStart   Х координата начальной точки
-     * @param yStart   Y координата начальной точки
+     * @param snake    Змея, для которой необходимо найти расстояние
      * @param elements Список элементов
      * @return Объект класса GoalPoint, содержащий расстояние до найденного элемента, его координаты и
      * направление первого шага.
      * В случае, если элемент не найден, расстояние до объекта = 0
      */
-    public GoalPoint searchNearestElement(int xStart, int yStart, Elements... elements) {
+    public GoalPoint searchNearestElement(MySnake snake, Elements... elements) {
         ArrayList<Point> queue = new ArrayList<>();
-        int[] dx = {0, 0, 1, -1};
-        int[] dy = {1, -1, 0, 0};
+        int xStart = (int) snake.getHeadPoint().getX();
+        int yStart = (int) snake.getHeadPoint().getY();
+
         int distance = 0;
         Direction direction = Direction.ACT;
         Point endPoint = new Point(0, 0);
@@ -152,10 +172,8 @@ public class Helper {
         int cells[][] = new int[board.getField().length][board.getField().length];
         for (int x = 0; x < cells.length; x++) {
             for (int y = 0; y < cells[x].length; y++)
-                if (board.isFreeAt(x, y))
-                    cells[x][y] = -1;
-                else
-                    cells[x][y] = -2;
+                cells[x][y] = -1;
+
         }
         //
         cells[xStart][yStart] = 0;
@@ -164,9 +182,12 @@ public class Helper {
             Point temp = queue.remove(0);
             //Перебор соседних ячеек
             for (int i = 0; i < dx.length; i++) {
-                //Если ячейку не проходили и это не барьер
+                //Если ячейку не проходили и это не барьер или змея может его пролететь
                 if (cells[temp.x + dx[i]][temp.y + dy[i]] == -1 &&
-                        board.isFreeAt(temp.x + dx[i], temp.y + dy[i])) {
+                        (board.isFreeAt(temp.x + dx[i], temp.y + dy[i]) ||
+                                (snake.isFly() && snake.getActOfPillFly() > cells[temp.x][temp.y] + 1 &&
+                                        (board.isAt(temp.x + dx[i], temp.y + dy[i], ENEMY_FULL) ||
+                                                board.isAt(temp.x + dx[i], temp.y + dy[i], Elements.STONE))))) {
                     cells[temp.x + dx[i]][temp.y + dy[i]] =
                             cells[temp.x][temp.y] + 1;
                     queue.add(new Point(temp.x + dx[i], temp.y + dy[i]));
@@ -218,9 +239,10 @@ public class Helper {
      * Тупик - ситуация, при которой дальнейшее движение неминуемо приведет к столкновению с барьером
      *
      * @param goalPoint Точка, к которой будет осуществляться движение
+     * @param snake     Змея, которая движется в заданную точку
      * @return Результат проверки ситуации на потенциальный тупик. True - тупик, False - не тупик
      */
-    public boolean isDeadEnd(GoalPoint goalPoint) {
+    public boolean isDeadEnd(GoalPoint goalPoint, MySnake snake, ArrayList<Snake> enemies) {
         int[][] cells = new int[sizeOfBoardX][sizeOfBoardY];
         for (int[] row : cells)
             Arrays.fill(row, 0);
@@ -245,18 +267,24 @@ public class Helper {
                 break;
         }
         cells[xNext][yNext] = 1;
-        int[] dx = {1, -1, 0, 0};
-        int[] dy = {0, 0, 1, -1};
 
         ArrayList<Point> exits = new ArrayList<>();
         exits.add(new Point(xNext, yNext));
         while (exits.size() == 1) {
             Point temp = exits.remove(0);
             for (int i = 0; i < dx.length; i++) {
-                if (cells[temp.x + dx[i]][temp.y + dy[i]] == 0
-                        && (board.isFreeAt(temp.x + dx[i], temp.y + dy[i]) ||
-                        (temp.x + dx[i] == goalPoint.getGoal().x && temp.y + dy[i] == goalPoint.getGoal().y))) {
-                    cells[temp.x + dx[i]][temp.y + dy[i]] = 1;
+                if (cells[temp.x + dx[i]][temp.y + dy[i]] == 0 //Если в точку не заходили
+                        && (board.isFreeAt(temp.x + dx[i], temp.y + dy[i]) || //Точка свободна
+                        (temp.x + dx[i] == goalPoint.getGoal().x && temp.y + dy[i] == goalPoint.getGoal().y) || //Или это - целевая точка
+                        (board.isAt(temp.x + dx[i], temp.y + dy[i], Elements.STONE) &&//Или камень
+                                (snake.isFly() && snake.getActOfPillFly() > cells[temp.x][temp.y] || //И его можно облететь
+                                        snake.isFury() && snake.getActOfPillFury() > cells[temp.x][temp.y] || //Или съесть
+                                        snake.getSize() > 5)) ||
+                        (board.isAt(temp.x + dx[i], temp.y + dy[i], Helper.ENEMY_FULL) && //Или это - противник
+                                (snake.isFly() && snake.getActOfPillFly() > cells[temp.x][temp.y]) || //И его можно облететь
+                                (snake.isFury() && snake.getActOfPillFury() > cells[temp.x][temp.y] && //Или съесть
+                                        !getSnakeByPoint(enemies, new Point(temp.x + dx[i], temp.y + dy[i])).isFury())))) {
+                    cells[temp.x + dx[i]][temp.y + dy[i]] = cells[temp.x][temp.y] + 1;
                     exits.add(new Point(temp.x + dx[i], temp.y + dy[i]));
                 }
             }
@@ -270,8 +298,9 @@ public class Helper {
 
     /**
      * Получение элемента, находящегося перед начальной точкой по ходу движения
-     * @param xHead Х координата начальной точки (голова змеи)
-     * @param yHead Y координата начальной точки (голова змеи)
+     *
+     * @param xHead         Х координата начальной точки (голова змеи)
+     * @param yHead         Y координата начальной точки (голова змеи)
      * @param headDirection Направление движения
      * @return Элемент, находящийся перед начальной точкой по ходу движения
      */
@@ -288,6 +317,41 @@ public class Helper {
             default:
                 return Elements.OTHER;
         }
+    }
+
+    /**
+     * Проверка безопасности следующего хода с точки зрения встречи голов змей
+     * @param goalPoint Целевая точка, в которую движется змея
+     * @param snake Змея, для которой происходит проверка безопасности
+     * @param enemies Список змей соперников
+     * @return Возможные значения: True - ход безопасен, False - ход опасен
+     */
+    public boolean checkHeadEnemy(GoalPoint goalPoint, MySnake snake, ArrayList<Snake> enemies) {
+        int xNext = (int) snake.getHeadPoint().getX();
+        int yNext = (int) snake.getHeadPoint().getY();
+        //Рассчет координат головы на следующем ходе
+        switch (goalPoint.getFirstStep()) {
+            case LEFT:
+                xNext--;
+                break;
+            case RIGHT:
+                xNext++;
+                break;
+            case UP:
+                yNext++;
+                break;
+            case DOWN:
+                yNext--;
+                break;
+        }
+        //Проверка наличия голов змей и возможности их съесть/облететь
+        for (int i = 0; i < dx.length; i++) {
+            if (board.isAt(xNext + dx[i], yNext + dy[i], ENEMY_HEAD) &&
+                    snake.compareTo(getSnakeByPoint(enemies, new Point(xNext + dx[i], yNext + dy[i]))) < 0 &&
+                    (!snake.isFly() || !(snake.getActOfPillFly() > 2)))
+                return false;
+        }
+        return true;
     }
 
     public void setBoard(Board board) {
