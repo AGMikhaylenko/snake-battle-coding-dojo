@@ -1,0 +1,16 @@
+
+Z	java:S106<"9Replace this use of System.out or System.err by a logger.(æ”²¬ıÿÿÿÿ8Ú®¼/
+Z	java:S106>"9Replace this use of System.out or System.err by a logger.(¶œÏ³şÿÿÿÿ8”ñ¶¼/
+u
+java:S3776"RRefactor this method to reduce its Cognitive Complexity from 28 to the 15 allowed.(ïÌíşÿÿÿÿ8‡êé¼/
+o
+java:S3776G"RRefactor this method to reduce its Cognitive Complexity from 35 to the 15 allowed.(Ãò‚8‡êé¼/
+m
+java:S1301v"KReplace this "switch" statement by "if" statements to increase readability.(––¨Ïúÿÿÿÿ8‡êé¼/
+p
+java:S3776±"RRefactor this method to reduce its Cognitive Complexity from 28 to the 15 allowed.(ù¡Û­8‡êé¼/
+U	java:S106="9Replace this use of System.out or System.err by a logger.(ôá¨8êÓ´¼/
+U	java:S106?"9Replace this use of System.out or System.err by a logger.(ÈÙ¢«8È„¸¼/
+S
+java:S5261h"1Add explicit curly braces to avoid dangling else.(„¶áìøÿÿÿÿ8‡êé¼/
+U	java:S106@"9Replace this use of System.out or System.err by a logger.(Öáç–8‡êé¼/
