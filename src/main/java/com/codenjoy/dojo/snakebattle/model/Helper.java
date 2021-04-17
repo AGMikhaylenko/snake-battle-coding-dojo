@@ -243,6 +243,10 @@ public class Helper {
      * @return Результат проверки ситуации на потенциальный тупик. True - тупик, False - не тупик
      */
     public boolean isDeadEnd(GoalPoint goalPoint, MySnake snake, ArrayList<Snake> enemies) {
+        //Если целевая точка - змея, то ситуация не тупиковая, так как освободится место после ее смерти
+        if (board.isAt((int) goalPoint.getGoal().getX(), (int) goalPoint.getGoal().getY(), ENEMY_FULL))
+            return false;
+
         int[][] cells = new int[sizeOfBoardX][sizeOfBoardY];
         for (int[] row : cells)
             Arrays.fill(row, 0);
@@ -279,7 +283,7 @@ public class Helper {
                         (board.isAt(temp.x + dx[i], temp.y + dy[i], Elements.STONE) &&//Или камень
                                 (snake.isFly() && snake.getActOfPillFly() > cells[temp.x][temp.y] || //И его можно облететь
                                         snake.isFury() && snake.getActOfPillFury() > cells[temp.x][temp.y] || //Или съесть
-                                        snake.getSize() > 5)) ||
+                                        snake.getSize() > 5 || board.isAt(goalPoint.getGoal().x, goalPoint.getGoal().y, Elements.FURY_PILL))) ||
                         (board.isAt(temp.x + dx[i], temp.y + dy[i], Helper.ENEMY_FULL) && //Или это - противник
                                 (snake.isFly() && snake.getActOfPillFly() > cells[temp.x][temp.y]) || //И его можно облететь
                                 (snake.isFury() && snake.getActOfPillFury() > cells[temp.x][temp.y] && //Или съесть
@@ -288,11 +292,25 @@ public class Helper {
                     exits.add(new Point(temp.x + dx[i], temp.y + dy[i]));
                 }
             }
-            if (exits.isEmpty())
-                return true;
-            if (exits.size() > 1)
-                return false;
         }
+        if (exits.isEmpty())
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * Проверка, есть ли голова змеи рядом с точкой
+     *
+     * @param x Х координата точки
+     * @param y Y координата точки
+     * @return Результат проверки
+     */
+    private boolean isHeadNear(int x, int y) {
+        for (int i = 0; i < dx.length; i++)
+            if (board.isAt(x + dx[i], y + dy[i], ENEMY_HEAD))
+                return true;
+
         return false;
     }
 
@@ -321,9 +339,10 @@ public class Helper {
 
     /**
      * Проверка безопасности следующего хода с точки зрения встречи голов змей
+     *
      * @param goalPoint Целевая точка, в которую движется змея
-     * @param snake Змея, для которой происходит проверка безопасности
-     * @param enemies Список змей соперников
+     * @param snake     Змея, для которой происходит проверка безопасности
+     * @param enemies   Список змей соперников
      * @return Возможные значения: True - ход безопасен, False - ход опасен
      */
     public boolean checkHeadEnemy(GoalPoint goalPoint, MySnake snake, ArrayList<Snake> enemies) {
@@ -348,7 +367,7 @@ public class Helper {
         for (int i = 0; i < dx.length; i++) {
             if (board.isAt(xNext + dx[i], yNext + dy[i], ENEMY_HEAD) &&
                     snake.compareTo(getSnakeByPoint(enemies, new Point(xNext + dx[i], yNext + dy[i]))) < 0 &&
-                    (!snake.isFly() || !(snake.getActOfPillFly() > 2)))
+                    (!snake.isFly() || snake.getActOfPillFly() <= 2))
                 return false;
         }
         return true;
@@ -356,5 +375,30 @@ public class Helper {
 
     public void setBoard(Board board) {
         this.board = board;
+    }
+
+    /**
+     * Проверка находится ли хвост между двух стен
+     * @return Результат проверки: True - находится, False - нет
+     */
+    public boolean tailIsSurrounded() {
+        for (int i = 0; i < sizeOfBoardX; i++)
+            for (int j = 0; j < sizeOfBoardY; j++) {
+                if (board.isAt(i, j, Elements.TAIL_END_DOWN) ||
+                        board.isAt(i, j, Elements.TAIL_END_UP))
+                    if (board.isAt(i - 1, j, Elements.WALL) &&
+                            board.isAt(i + 1, j, Elements.WALL))
+                        return true;
+                    else
+                        return false;
+                if (board.isAt(i, j, Elements.TAIL_END_LEFT) ||
+                        board.isAt(i, j, Elements.TAIL_END_RIGHT))
+                    if (board.isAt(i, j - 1, Elements.WALL) &&
+                            board.isAt(i, j + 1, Elements.WALL))
+                        return true;
+                    else
+                        return false;
+            }
+        return false;
     }
 }

@@ -1,18 +1,8 @@
 
 ‘
-java:S1319"oThe type of the "body" object should be an interface such as "List" rather than the implementation "ArrayList".( õşåÿÿÿÿÿ8Øæê¸/
-‘
-java:S1319B"oThe type of the "body" object should be an interface such as "List" rather than the implementation "ArrayList".(ÅşôØùÿÿÿÿ8êµº¹/
-z	java:S131&"YComplete cases by adding the missing enum constants or add a default case to this switch.(ú±¬£üÿÿÿÿ8Ö¨°¹/
+java:S1319Z"oThe type of the "body" object should be an interface such as "List" rather than the implementation "ArrayList".(ÅşôØùÿÿÿÿ8ªÚƒÑ/
 m
-java:S1301&"KReplace this "switch" statement by "if" statements to increase readability.(ú±¬£üÿÿÿÿ8ë³±¹/
-\
-java:S1161":Add the "@Override" annotation above this method signature(—ÙŒİûÿÿÿÿ8ù·Ç¿/
-W
-java:S11612":Add the "@Override" annotation above this method signature(³­·¦8ù·Ç¿/
-\
-java:S11616":Add the "@Override" annotation above this method signature(ÍÊ‹¤şÿÿÿÿ8ù·Ç¿/
-W
-java:S1161:":Add the "@Override" annotation above this method signature(¯ßÂÛ8ù·Ç¿/
-W
-java:S1161>":Add the "@Override" annotation above this method signature(½öš8ù·Ç¿/
+java:S1301("KReplace this "switch" statement by "if" statements to increase readability.(ú±¬£üÿÿÿÿ8ë³±¹/
+z	java:S131("YComplete cases by adding the missing enum constants or add a default case to this switch.(ú±¬£üÿÿÿÿ8Ö¨°¹/
+‘
+java:S1319"oThe type of the "body" object should be an interface such as "List" rather than the implementation "ArrayList".( õşåÿÿÿÿÿ8Øæê¸/

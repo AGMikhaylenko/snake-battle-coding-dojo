@@ -1,16 +1,16 @@
 
-Z	java:S106<"9Replace this use of System.out or System.err by a logger.(æ”²¬ıÿÿÿÿ8Ú®¼/
-Z	java:S106>"9Replace this use of System.out or System.err by a logger.(¶œÏ³şÿÿÿÿ8”ñ¶¼/
 u
-java:S3776"RRefactor this method to reduce its Cognitive Complexity from 28 to the 15 allowed.(ïÌíşÿÿÿÿ8‡êé¼/
-o
-java:S3776G"RRefactor this method to reduce its Cognitive Complexity from 35 to the 15 allowed.(Ãò‚8‡êé¼/
-m
-java:S1301v"KReplace this "switch" statement by "if" statements to increase readability.(––¨Ïúÿÿÿÿ8‡êé¼/
+java:S3776¾"RRefactor this method to reduce its Cognitive Complexity from 43 to the 15 allowed.(ïÌíşÿÿÿÿ8á¢Üå/
 p
-java:S3776±"RRefactor this method to reduce its Cognitive Complexity from 28 to the 15 allowed.(ù¡Û­8‡êé¼/
-U	java:S106="9Replace this use of System.out or System.err by a logger.(ôá¨8êÓ´¼/
-U	java:S106?"9Replace this use of System.out or System.err by a logger.(ÈÙ¢«8È„¸¼/
-S
-java:S5261h"1Add explicit curly braces to avoid dangling else.(„¶áìøÿÿÿÿ8‡êé¼/
-U	java:S106@"9Replace this use of System.out or System.err by a logger.(Öáç–8‡êé¼/
+java:S3776í"RRefactor this method to reduce its Cognitive Complexity from 43 to the 15 allowed.(ù¡Û­8á¢Üå/
+o
+java:S3776N"RRefactor this method to reduce its Cognitive Complexity from 47 to the 15 allowed.(Ãò‚8á¢Üå/
+U	java:S106E"9Replace this use of System.out or System.err by a logger.(Öáç–8‡êé¼/
+Z	java:S106@"9Replace this use of System.out or System.err by a logger.(æ”²¬ıÿÿÿÿ8Ú®¼/
+Z	java:S106A"9Replace this use of System.out or System.err by a logger.(ì‰Ğóüÿÿÿÿ8¢ÇÊØ/
+n
+java:S1301§"KReplace this "switch" statement by "if" statements to increase readability.(––¨Ïúÿÿÿÿ8á¢Üå/
+U	java:S106D"9Replace this use of System.out or System.err by a logger.(ÈÙ¢«8È„¸¼/
+Z	java:S106C"9Replace this use of System.out or System.err by a logger.(¶œÏ³şÿÿÿÿ8”ñ¶¼/
+U	java:S106B"9Replace this use of System.out or System.err by a logger.(ôá¨8êÓ´¼/
+T	java:S106?"9Replace this use of System.out or System.err by a logger.(ÿ¾G8Ÿ„ä/

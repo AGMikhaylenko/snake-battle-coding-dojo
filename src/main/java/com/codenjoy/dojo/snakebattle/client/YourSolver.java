@@ -54,7 +54,7 @@ public class YourSolver implements Solver<Board> {
         if (solution == null || board.isAt(board.getMe(), Elements.HEAD_SLEEP))
             solution = new Solution(this.board);
 
-        return solution.getNextStep(this.board).toString();
+        return solution.getNextStep(this.board);
     }
 
     public static void main(String[] args) {

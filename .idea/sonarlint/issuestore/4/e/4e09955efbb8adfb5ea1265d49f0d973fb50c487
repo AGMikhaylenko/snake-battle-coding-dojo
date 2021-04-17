@@ -1,33 +1,48 @@
 
 :
 java:S2386"Make this member "protected".(Ò«í 8¶ÓĞ¼/
-b
-java:S1124"EReorder the modifiers to comply with the Java Language Specification.(Ò«í 8½Ã˜½/
-”
-java:S13199"rThe type of the "enemies" object should be an interface such as "List" rather than the implementation "ArrayList".(Ûµ¾äøÿÿÿÿ8Öº¥º/
 a
 java:S1124"EReorder the modifiers to comply with the Java Language Specification.(öæšq8¢¥—½/
-:
-java:S2386"Make this member "protected".(Œ–Îá8²˜…º/
+•
+java:S1319õ"rThe type of the "enemies" object should be an interface such as "List" rather than the implementation "ArrayList".(¦ºÚ ıÿÿÿÿ8Ù°®Ø/
+d
+java:S1126¬"AReplace this if-then-else statement by a single return statement.(¤¾û¢øÿÿÿÿ8³ªûã/
+{	java:S135Ò"YReduce the total number of break and continue statements in this loop to use at most one.(—ù•™ÿÿÿÿÿ8Òÿ¾/
+9
+java:S2386"Make this member "protected".(öæšq8œÄˆº/
+]	java:S125u"<This block of commented-out lines of code should be removed.(²¯à­ÿÿÿÿÿ8‹ßÌß/
+{	java:S131ƒ"YComplete cases by adding the missing enum constants or add a default case to this switch.(¦¨¿…ûÿÿÿÿ8³ªûã/
+b
+java:S1124"EReorder the modifiers to comply with the Java Language Specification.(Â°é¥8îö—½/
+u
+java:S3776õ"RRefactor this method to reduce its Cognitive Complexity from 22 to the 15 allowed.(¦ºÚ ıÿÿÿÿ8„Ä‹Ø/
+
+java:S1319Z"pThe return type of this method should be an interface such as "List" rather than the implementation "ArrayList".(¤ñª8àÂ›º/
 :
 java:S2386"Make this member "protected".(Â°é¥8öı„º/
 b
-java:S1124"EReorder the modifiers to comply with the Java Language Specification.(Â°é¥8îö—½/
-V
-java:S1197˜"8Move the array designator from the variable to the type.(Ä•¹ô8Òÿ¾/
-b
 java:S1124"EReorder the modifiers to comply with the Java Language Specification.(Œ–Îá8ÿ—˜½/
 \
-java:S1155»">Use isEmpty() to check whether the collection is empty or not.(İÃŸš8Òÿ¾/
-{	java:S131é"YComplete cases by adding the missing enum constants or add a default case to this switch.(¦¨¿…ûÿÿÿÿ8Òÿ¾/
-’
-java:S1319G"pThe return type of this method should be an interface such as "List" rather than the implementation "ArrayList".(õ©©£ùÿÿÿÿ8ÚÆšº/
-\
-java:S1155£">Use isEmpty() to check whether the collection is empty or not.(ò¹¯Ó8Òÿ¾/
-
-java:S1319W"pThe return type of this method should be an interface such as "List" rather than the implementation "ArrayList".(¤ñª8àÂ›º/
-{	java:S135½"YReduce the total number of break and continue statements in this loop to use at most one.(—ù•™ÿÿÿÿÿ8Òÿ¾/
+java:S1155µ">Use isEmpty() to check whether the collection is empty or not.(ò¹¯Ó8Òÿ¾/
+:
+java:S2386"Make this member "protected".(Œ–Îá8²˜…º/
 u
-java:S3776"RRefactor this method to reduce its Cognitive Complexity from 44 to the 15 allowed.(Êóù¹üÿÿÿÿ8Òÿ¾/
-9
-java:S2386"Make this member "protected".(öæšq8œÄˆº/
+java:S3776¢"RRefactor this method to reduce its Cognitive Complexity from 43 to the 15 allowed.(õæ²†úÿÿÿÿ8Òÿ¾/
+^	java:S125§"<This block of commented-out lines of code should be removed.(É÷ñŞøÿÿÿÿ8³ªûã/
+b
+java:S1124"EReorder the modifiers to comply with the Java Language Specification.(Ò«í 8½Ã˜½/
+{	java:S131Õ"YComplete cases by adding the missing enum constants or add a default case to this switch.(¦¨¿…ûÿÿÿÿ8³ªûã/
+
+java:S1319"qThe type of the "snakes" object should be an interface such as "List" rather than the implementation "ArrayList".(Õè€8Û·¼Ñ/
+L
+java:S1940ç")Use the opposite operator ("<=") instead.(”Øˆûÿÿÿÿ8³ªûã/
+”
+java:S1319<"rThe type of the "enemies" object should be an interface such as "List" rather than the implementation "ArrayList".(Ûµ¾äøÿÿÿÿ8Öº¥º/
+•
+java:S1319Ñ"rThe type of the "enemies" object should be an interface such as "List" rather than the implementation "ArrayList".(Â”Ç¶úÿÿÿÿ8³ªûã/
+\
+java:S1155Ğ">Use isEmpty() to check whether the collection is empty or not.(İÃŸš8Òÿ¾/
+’
+java:S1319J"pThe return type of this method should be an interface such as "List" rather than the implementation "ArrayList".(õ©©£ùÿÿÿÿ8ÚÆšº/
+V
+java:S1197¬"8Move the array designator from the variable to the type.(Ä•¹ô8Òÿ¾/

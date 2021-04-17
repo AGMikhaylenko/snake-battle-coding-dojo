@@ -12,6 +12,7 @@ public class MySnake extends Snake {
     private int actOfPillFly; //Остаток ходов действия пилюли полета
     private int actOfPillFury; //Остаток ходов действия пилюли ярости
     private Direction headDirection; //Направление движения
+    private int countOfStones; //Количество камней, которые можно сбросить
 
     /**
      * Конструктор класса
@@ -21,7 +22,7 @@ public class MySnake extends Snake {
     public MySnake(ArrayList<Point> body) {
         this.body = body;
         isFly = isFury = false;
-        actOfPillFly = actOfPillFury = 0;
+        actOfPillFly = actOfPillFury = countOfStones = 0;
         headDirection = Direction.RIGHT;
     }
 
@@ -29,13 +30,17 @@ public class MySnake extends Snake {
      * Обновление значений полей змеи
      *
      * @param nextElement Следующий элемент по ходу движения
+     * @param action Сбрасывается ли камень на следующем ходу
      */
-    public void update(Elements nextElement) {
+    public void update(Elements nextElement, boolean action) {
         if (isFly && --actOfPillFly == 0)
             isFly = false;
 
         if (isFury && --actOfPillFury == 0)
             isFury = false;
+
+        if (action)
+            countOfStones--;
 
         switch (nextElement) {
             case FLYING_PILL:
@@ -45,6 +50,9 @@ public class MySnake extends Snake {
             case FURY_PILL:
                 isFury = true;
                 actOfPillFury = 10;
+                break;
+            case STONE:
+                countOfStones++;
                 break;
         }
     }
@@ -56,9 +64,9 @@ public class MySnake extends Snake {
      * @return Возможные значения: объект сильнее другой змеи - >0, другая змея сильнее - <0, силы равны = 0
      */
     public int compareTo(Snake enemy) {
-        if (this.isFury) {
+        if (this.isFury && actOfPillFury > 1) {
             if (enemy.isFury) {
-                return this.getSize() - enemy.getSize() - 1;
+                return this.getSize() - enemy.getSize() - 2;
             } else {
                 return 1;
             }
@@ -66,7 +74,7 @@ public class MySnake extends Snake {
             if (enemy.isFury) {
                 return -1;
             } else {
-                return this.getSize() - enemy.getSize() - 1;
+                return this.getSize() - enemy.getSize() - 2;
             }
         }
     }
@@ -91,4 +99,7 @@ public class MySnake extends Snake {
         this.body = body;
     }
 
+    public int getCountOfStones() {
+        return countOfStones;
+    }
 }

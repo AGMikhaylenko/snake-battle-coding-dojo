@@ -3,6 +3,7 @@ package com.codenjoy.dojo.snakebattle.model;
 import com.codenjoy.dojo.services.Direction;
 import com.codenjoy.dojo.snakebattle.client.Board;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 /**
@@ -17,6 +18,10 @@ public class Solution {
     private Helper helper;
     private ArrayList<Snake> enemies; //Список змей противников
     private int distanceToEnemy; //Дистанция до ближайшего соперника
+    private int numberOfStep; //Номер хода в раунде
+    private boolean nextStepIsAct; //Метка ставить ли камень на следующем ходе
+
+    private final String ACT = ",ACT";
 
     /**
      * Конструктор класса
@@ -30,6 +35,8 @@ public class Solution {
         yHead = board.getMe().getY();
         mySnake = new MySnake(helper.getMyBody(xHead, yHead));
         enemies = helper.getEnemiesSnakes();
+        numberOfStep = 0;
+        nextStepIsAct = false;
     }
 
     /**
@@ -38,7 +45,8 @@ public class Solution {
      * @param board Текущее игровое поле
      * @return Направление следующего шага
      */
-    public Direction getNextStep(Board board) {
+    public String getNextStep(Board board) {
+        long millis = System.currentTimeMillis();
         this.board = board;
         helper.setBoard(board);
         //Обновление значений ячеек своей змеи и змей противников
@@ -49,19 +57,39 @@ public class Solution {
 
         doChoice();
 
-        mySnake.update(helper.getNextElement(xHead, yHead, mySnake.getHeadDirection()));
-        printInfo();
-        return mySnake.getHeadDirection();
+        boolean isAction = false;
+        //Проверка возможности поставить первый камень
+        if (helper.tailIsSurrounded() && mySnake.getCountOfStones() > 1 && !nextStepIsAct && mySnake.getSize() >= 8) {
+            nextStepIsAct = true;
+            isAction = true;
+        }
+        //Проверка  нужно ли ставить второй камень
+        if (nextStepIsAct) {
+            isAction = true;
+            nextStepIsAct = false;
+        }
+
+        mySnake.update(helper.getNextElement(xHead, yHead, mySnake.getHeadDirection()), isAction);
+        numberOfStep++;
+        printInfo(System.currentTimeMillis() - millis);
+
+        if (isAction)
+            return mySnake.getHeadDirection().toString() + ACT;
+        else
+            return mySnake.getHeadDirection().toString();
     }
 
     /**
      * Печать информации о текущих характеристик объектов
      */
-    private void printInfo() {
+    private void printInfo(long time) {
+        System.out.println("Time = " + time);
+        System.out.println("Step № " + numberOfStep);
         System.out.println("Size = " + mySnake.getSize());
         System.out.println("Max size of enemy = " + helper.getMaxSizeOfEnemy(enemies));
         System.out.println("Steps with fury = " + mySnake.getActOfPillFury());
         System.out.println("Steps with fly = " + mySnake.getActOfPillFly());
+        System.out.println("Count of stones = " + mySnake.getCountOfStones());
         System.out.println("Direction = " + mySnake.getHeadDirection());
         System.out.println("Count of enemies = " + enemies.size());
     }
@@ -69,6 +97,8 @@ public class Solution {
     /**
      * Выбор направления движения в следующем шаге
      * Значение направления передается в объект mySnake
+     * Выбор осуществляется на основании приоритетов: 1. Съесть соперника 2. Пилюля ярости 3. Пилюля полета 4. Золото
+     * 5. Камень 6. Яблоко 7. Уход от столкновения
      */
     private void doChoice() {
         GoalPoint dFury = helper.searchNearestElement(mySnake, Elements.FURY_PILL);
@@ -85,7 +115,7 @@ public class Solution {
             if (dStone.getDistance() != 0 && !helper.isDeadEnd(dStone, mySnake, enemies) && helper.checkHeadEnemy(dStone, mySnake, enemies)
                     && checkOpportunityStone(dStone) && //Если есть возможность съесть камень
                     (dStone.getDistance() * 1.5 < dGold.getDistance() || dGold.getDistance() == 0) && //Он ближе чем золото
-                    (dStone.getDistance() * 2 < dFly.getDistance() || dFly.getDistance() == 0) && //Он ближе чем полет
+                    (dStone.getDistance() <= dFly.getDistance() || dFly.getDistance() == 0) && //Он ближе чем полет
                     (dStone.getDistance() * 2 < dFury.getDistance() || dFury.getDistance() == 0 && //Он ближе чем ярость
                             (dStone.getDistance() < dApple.getDistance() * 3 || dApple.getDistance() == 0))) { //Не дальше чем яблоко в 3 раз
                 mySnake.setHeadDirection(dStone.getFirstStep()); //Идем к камню
@@ -101,8 +131,8 @@ public class Solution {
                 } else {
                     if (dFly.getDistance() != 0 && !helper.isDeadEnd(dFly, mySnake, enemies) &&
                             helper.checkHeadEnemy(dFly, mySnake, enemies) && //Проверка пилюли полета
-                            (dFly.getDistance() * 1.5 < dGold.getDistance() || dGold.getDistance() == 0) && //Если ближе золота
-                            (dFly.getDistance() < dApple.getDistance() * 1.5 || dApple.getDistance() == 0)) { //Не дальше чем яблоко в 1,5 раз
+                            (dFly.getDistance() * 1.2 < dGold.getDistance() || dGold.getDistance() == 0) && //Если ближе золота
+                            (dFly.getDistance() < dApple.getDistance() || dApple.getDistance() == 0)) { //Не дальше чем яблоко
                         mySnake.setHeadDirection(dFly.getFirstStep());//Идем к пилюле полета
 
                     } else {
@@ -137,6 +167,7 @@ public class Solution {
     private boolean checkOpportunityEat(GoalPoint dEnemy) {
         return mySnake.isFury &&
                 !helper.getSnakeByPoint(enemies, dEnemy.getGoal()).isFury() &&
+                !helper.getSnakeByPoint(enemies, dEnemy.getGoal()).isFly() &&
                 dEnemy.getDistance() < mySnake.getActOfPillFury() &&
                 dEnemy.getDistance() != distanceToEnemy;
     }
@@ -150,8 +181,10 @@ public class Solution {
     private boolean checkOpportunityStone(GoalPoint dStone) {
         int maxSizeOfEnemy = helper.getMaxSizeOfEnemy(enemies);
         int mySize = mySnake.getSize();
-        return mySnake.isFury() && mySnake.getActOfPillFury() > dStone.getDistance() ||
-                mySize > maxSizeOfEnemy + 6;
+        return (mySnake.isFury() && mySnake.getActOfPillFury() > dStone.getDistance() ||//Если мы змея под яростью
+                mySize > maxSizeOfEnemy + 6 && numberOfStep < 250 || //Или больше самого крупного соперника и до конца больше 50 ходов
+                mySnake.getSize() > 5 && numberOfStep < 75) //Или с начала раунда прошло не более 75 ходов
+                && mySnake.getActOfPillFly() < dStone.getDistance(); //И не находится под действием пилюли полета
     }
 
     /**
@@ -198,18 +231,29 @@ public class Solution {
             //Если обе стороны закрыты, выбираем меньшее из зол
             if (!board.isFreeAt(xHead + 1, yHead) &&
                     !board.isFreeAt(xHead - 1, yHead)) {
-                if (board.isAt(xHead + 1, yHead, Helper.MY_BODY) ||
-                        (board.isAt(xHead + 1, yHead, Helper.ENEMY_FULL)
-                                && (mySnake.isFury() || mySnake.isFly())) ||
-                        (board.isAt(xHead + 1, yHead, Elements.STONE)
-                                && (mySnake.isFury() || mySnake.isFly() || mySnake.getSize() >= 5)))
-                    mySnake.setHeadDirection(Direction.RIGHT);
-                if (board.isAt(xHead - 1, yHead, Helper.MY_BODY) ||
-                        (board.isAt(xHead - 1, yHead, Helper.ENEMY_FULL)
-                                && (mySnake.isFury() || mySnake.isFly())) ||
-                        (board.isAt(xHead - 1, yHead, Elements.STONE)
-                                && (mySnake.isFury() || mySnake.isFly() || mySnake.getSize() >= 5)))
-                    mySnake.setHeadDirection(Direction.LEFT);
+                //Если слева и справа змея, проверяем на наличие голов
+                //Ситуация возникает, если "разрезать змею"
+                if (board.isAt(xHead + 1, yHead, Helper.ENEMY_FULL) && board.isAt(xHead - 1, yHead, Helper.ENEMY_FULL)) {
+                    //Идем вправо, если у тела змеи справа нет головы
+                    if (helper.getSnakeByPoint(enemies, new Point(xHead + 1, yHead)).getBody().isEmpty())
+                        mySnake.setHeadDirection(Direction.RIGHT);
+                    //Идем влево, если у тела змеи слева нет головы
+                    if (helper.getSnakeByPoint(enemies, new Point(xHead - 1, yHead)).getBody().isEmpty())
+                        mySnake.setHeadDirection(Direction.LEFT);
+                } else {
+                    if (board.isAt(xHead + 1, yHead, Helper.MY_BODY) ||
+                            (board.isAt(xHead + 1, yHead, Helper.ENEMY_FULL)
+                                    && (mySnake.isFury() || mySnake.isFly())) ||
+                            (board.isAt(xHead + 1, yHead, Elements.STONE)
+                                    && (mySnake.isFury() || mySnake.isFly() || mySnake.getSize() >= 5)))
+                        mySnake.setHeadDirection(Direction.RIGHT);
+                    if (board.isAt(xHead - 1, yHead, Helper.MY_BODY) ||
+                            (board.isAt(xHead - 1, yHead, Helper.ENEMY_FULL)
+                                    && (mySnake.isFury() || mySnake.isFly())) ||
+                            (board.isAt(xHead - 1, yHead, Elements.STONE)
+                                    && (mySnake.isFury() || mySnake.isFly() || mySnake.getSize() >= 5)))
+                        mySnake.setHeadDirection(Direction.LEFT);
+                }
             }
         }
     }
@@ -234,19 +278,32 @@ public class Solution {
             //Если обе стороны закрыты, выбираем меньшее из зол
             if (!board.isFreeAt(xHead, yHead + 1) &&
                     !board.isFreeAt(xHead, yHead - 1)) {
-                if (board.isAt(xHead, yHead + 1, Helper.MY_BODY) ||
-                        (board.isAt(xHead, yHead + 1, Helper.ENEMY_FULL)
-                                && (mySnake.isFury() || mySnake.isFly())) ||
-                        (board.isAt(xHead, yHead + 1, Elements.STONE)
-                                && (mySnake.isFury() || mySnake.isFly() || mySnake.getSize() >= 5)))
-                    mySnake.setHeadDirection(Direction.UP);
-                if (board.isAt(xHead, yHead - 1, Helper.MY_BODY) ||
-                        (board.isAt(xHead, yHead - 1, Helper.ENEMY_FULL)
-                                && (mySnake.isFury() || mySnake.isFly())) ||
-                        (board.isAt(xHead, yHead - 1, Elements.STONE)
-                                && (mySnake.isFury() || mySnake.isFly() || mySnake.getSize() >= 5)))
-                    mySnake.setHeadDirection(Direction.DOWN);
+                //Если сверху и снизу змея, проверяем на наличие голов
+                //Ситуация возникает, если "разрезать змею"
+                if (board.isAt(xHead, yHead + 1, Helper.ENEMY_FULL) && board.isAt(xHead, yHead - 1, Helper.ENEMY_FULL)) {
+                    //Идем вверх, если у тела змеи сверху нет головы
+                    if (helper.getSnakeByPoint(enemies, new Point(xHead, yHead + 1)).getBody().isEmpty())
+                        mySnake.setHeadDirection(Direction.UP);
+                    //Идем вниз, если у тела змеи снизу нет головы
+                    if (helper.getSnakeByPoint(enemies, new Point(xHead, yHead - 1)).getBody().isEmpty())
+                        mySnake.setHeadDirection(Direction.DOWN);
+                } else {
+                    if (board.isAt(xHead, yHead + 1, Helper.MY_BODY) ||
+                            (board.isAt(xHead, yHead + 1, Helper.ENEMY_FULL)
+                                    && (mySnake.isFury() || mySnake.isFly())) ||
+                            (board.isAt(xHead, yHead + 1, Elements.STONE)
+                                    && (mySnake.isFury() || mySnake.isFly() || mySnake.getSize() >= 5)))
+                        mySnake.setHeadDirection(Direction.UP);
+                    if (board.isAt(xHead, yHead - 1, Helper.MY_BODY) ||
+                            (board.isAt(xHead, yHead - 1, Helper.ENEMY_FULL)
+                                    && (mySnake.isFury() || mySnake.isFly())) ||
+                            (board.isAt(xHead, yHead - 1, Elements.STONE)
+                                    && (mySnake.isFury() || mySnake.isFly() || mySnake.getSize() >= 5)))
+                        mySnake.setHeadDirection(Direction.DOWN);
+                }
             }
         }
     }
+
+
 }
