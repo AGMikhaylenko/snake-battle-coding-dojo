@@ -30,7 +30,7 @@ public class MySnake extends Snake {
      * Обновление значений полей змеи
      *
      * @param nextElement Следующий элемент по ходу движения
-     * @param action Сбрасывается ли камень на следующем ходу
+     * @param action      Сбрасывается ли камень на следующем ходу
      */
     public void update(Elements nextElement, boolean action) {
         if (isFly && --actOfPillFly == 0)
@@ -52,7 +52,8 @@ public class MySnake extends Snake {
                 actOfPillFury = 10;
                 break;
             case STONE:
-                countOfStones++;
+                if (!isFly)
+                    countOfStones++;
                 break;
         }
     }

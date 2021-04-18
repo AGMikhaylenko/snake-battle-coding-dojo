@@ -159,7 +159,7 @@ public class Helper {
      * направление первого шага.
      * В случае, если элемент не найден, расстояние до объекта = 0
      */
-    public GoalPoint searchNearestElement(MySnake snake, Elements... elements) {
+    public GoalPoint searchNearestElement(MySnake snake, ArrayList<Snake> enemies, Elements... elements) {
         ArrayList<Point> queue = new ArrayList<>();
         int xStart = (int) snake.getHeadPoint().getX();
         int yStart = (int) snake.getHeadPoint().getY();
@@ -169,11 +169,10 @@ public class Helper {
         Point endPoint = new Point(0, 0);
 
         //Заполнение дополнительного массива значениями по умолчанию
-        int cells[][] = new int[board.getField().length][board.getField().length];
+        int cells[][] = new int[sizeOfBoardX][sizeOfBoardY];
         for (int x = 0; x < cells.length; x++) {
             for (int y = 0; y < cells[x].length; y++)
                 cells[x][y] = -1;
-
         }
         //
         cells[xStart][yStart] = 0;
@@ -193,7 +192,9 @@ public class Helper {
                     queue.add(new Point(temp.x + dx[i], temp.y + dy[i]));
                 }
                 //Если необходимый элемент найден - запоминаем его местонахождение и сохраняем расстояние
-                if (board.isAt(temp.x + dx[i], temp.y + dy[i], elements)) {
+                if (board.isAt(temp.x + dx[i], temp.y + dy[i], elements) &&
+                        cells[temp.x][temp.y] + 1 <= //<-----------------------------
+                                smallestDistanceEnemyToPoint(temp.x + dx[i], temp.y + dy[i], enemies, elements)) {//<-----------------
                     distance = cells[temp.x][temp.y] + 1;
                     cells[temp.x + dx[i]][temp.y + dy[i]] = distance;
                     endPoint = new Point(temp.x + dx[i], temp.y + dy[i]);
@@ -232,6 +233,61 @@ public class Helper {
         }
 
         return new GoalPoint(endPoint, direction, distance);
+    }
+
+
+    /**
+     * Расчет минимальной дистанции от змеи соперника до точки, если д
+     *
+     * @param xGoal    Х координата целевой точки
+     * @param yGoal    Y координата целевой точки
+     * @param enemies  Список змей
+     * @param elements Целевой элемент
+     * @return Дистанция змеи до целевого элемента
+     */
+    private int smallestDistanceEnemyToPoint(int xGoal, int yGoal, ArrayList<Snake> enemies, Elements... elements) {
+        int minDistance = Integer.MAX_VALUE;
+
+        for (Snake s : enemies) {
+            if (s.getSize() != 0) {
+                int cells[][] = new int[sizeOfBoardX][sizeOfBoardY];
+                for (int x = 0; x < cells.length; x++) {
+                    for (int y = 0; y < cells[x].length; y++)
+                        cells[x][y] = -1;
+                }
+
+                ArrayList<Point> queue = new ArrayList<>();
+                Point head = s.getHeadPoint();
+                queue.add(head);
+                cells[head.x][head.y] = 0;
+                int dist = 0;
+                while (queue.size() != 0 && dist == 0) {
+                    Point temp = queue.remove(0);
+
+                    for (int i = 0; i < dx.length; i++) {
+                        //Если ячейку не проходили и это не барьер
+                        if (cells[temp.x + dx[i]][temp.y + dy[i]] == -1 &&
+                                board.isFreeAt(temp.x + dx[i], temp.y + dy[i])) {
+                            cells[temp.x + dx[i]][temp.y + dy[i]] =
+                                    cells[temp.x][temp.y] + 1;
+                            queue.add(new Point(temp.x + dx[i], temp.y + dy[i]));
+                        }
+                        //Если необходимый элемент найден - запоминаем его местонахождение и сохраняем расстояние
+                        if (board.isAt(temp.x + dx[i], temp.y + dy[i], elements)) {
+                            if (temp.x + dx[i] == xGoal && temp.y + dy[i] == yGoal)
+                                dist = cells[temp.x][temp.y] + 1;
+                            else
+                                dist = Integer.MAX_VALUE;
+                        }
+                    }
+                }
+
+                if (dist < minDistance)
+                    minDistance = dist;
+            }
+        }
+
+        return minDistance;
     }
 
     /**
@@ -379,6 +435,7 @@ public class Helper {
 
     /**
      * Проверка находится ли хвост между двух стен
+     *
      * @return Результат проверки: True - находится, False - нет
      */
     public boolean tailIsSurrounded() {

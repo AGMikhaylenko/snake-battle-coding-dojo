@@ -5,6 +5,7 @@ import com.codenjoy.dojo.snakebattle.client.Board;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Класс, содержащий методы выбора движения бота для игры SnakeBattle
@@ -57,32 +58,37 @@ public class Solution {
 
         doChoice();
 
-        boolean isAction = false;
+        boolean isAction = false;//Нужно ли скидывать камень на этом ходу
+
         //Проверка возможности поставить первый камень
         if (helper.tailIsSurrounded() && mySnake.getCountOfStones() > 1 && !nextStepIsAct && mySnake.getSize() >= 8) {
             nextStepIsAct = true;
             isAction = true;
-        }
-        //Проверка  нужно ли ставить второй камень
-        if (nextStepIsAct) {
-            isAction = true;
-            nextStepIsAct = false;
+        }else {
+            //Проверка  нужно ли ставить второй камень
+            if (nextStepIsAct) {
+                isAction = true;
+                nextStepIsAct = false;
+            }
         }
 
         mySnake.update(helper.getNextElement(xHead, yHead, mySnake.getHeadDirection()), isAction);
         numberOfStep++;
-        printInfo(System.currentTimeMillis() - millis);
 
+        String answer = mySnake.getHeadDirection().toString();
         if (isAction)
-            return mySnake.getHeadDirection().toString() + ACT;
-        else
-            return mySnake.getHeadDirection().toString();
+            answer += ACT;
+
+        printInfo(System.currentTimeMillis() - millis, answer);
+
+        return answer;
     }
 
     /**
      * Печать информации о текущих характеристик объектов
      */
-    private void printInfo(long time) {
+    private void printInfo(long time, String answer) {
+        System.out.println(new Date(System.currentTimeMillis()));
         System.out.println("Time = " + time);
         System.out.println("Step № " + numberOfStep);
         System.out.println("Size = " + mySnake.getSize());
@@ -90,8 +96,8 @@ public class Solution {
         System.out.println("Steps with fury = " + mySnake.getActOfPillFury());
         System.out.println("Steps with fly = " + mySnake.getActOfPillFly());
         System.out.println("Count of stones = " + mySnake.getCountOfStones());
-        System.out.println("Direction = " + mySnake.getHeadDirection());
         System.out.println("Count of enemies = " + enemies.size());
+        System.out.println("Direction = " + answer);
     }
 
     /**
@@ -101,12 +107,12 @@ public class Solution {
      * 5. Камень 6. Яблоко 7. Уход от столкновения
      */
     private void doChoice() {
-        GoalPoint dFury = helper.searchNearestElement(mySnake, Elements.FURY_PILL);
-        GoalPoint dFly = helper.searchNearestElement(mySnake, Elements.FLYING_PILL);
-        GoalPoint dApple = helper.searchNearestElement(mySnake, Elements.APPLE);
-        GoalPoint dGold = helper.searchNearestElement(mySnake, Elements.GOLD);
-        GoalPoint dStone = helper.searchNearestElement(mySnake, Elements.STONE);
-        GoalPoint dEnemy = helper.searchNearestElement(mySnake, Helper.ENEMY_FULL);
+        GoalPoint dFury = helper.searchNearestElement(mySnake, enemies, Elements.FURY_PILL);
+        GoalPoint dFly = helper.searchNearestElement(mySnake, enemies, Elements.FLYING_PILL);
+        GoalPoint dApple = helper.searchNearestElement(mySnake, enemies, Elements.APPLE);
+        GoalPoint dGold = helper.searchNearestElement(mySnake, enemies, Elements.GOLD);
+        GoalPoint dStone = helper.searchNearestElement(mySnake, enemies, Elements.STONE);
+        GoalPoint dEnemy = helper.searchNearestElement(mySnake, enemies, Helper.ENEMY_FULL);
 
         if (checkOpportunityEat(dEnemy)) { //Если есть возможность съесть змею противника
             mySnake.setHeadDirection(dEnemy.getFirstStep()); //Идем к змее противника
@@ -182,8 +188,8 @@ public class Solution {
         int maxSizeOfEnemy = helper.getMaxSizeOfEnemy(enemies);
         int mySize = mySnake.getSize();
         return (mySnake.isFury() && mySnake.getActOfPillFury() > dStone.getDistance() ||//Если мы змея под яростью
-                mySize > maxSizeOfEnemy + 6 && numberOfStep < 250 || //Или больше самого крупного соперника и до конца больше 50 ходов
-                mySnake.getSize() > 5 && numberOfStep < 75) //Или с начала раунда прошло не более 75 ходов
+                mySize > maxSizeOfEnemy + 7 && numberOfStep < 250 ) //Или больше самого крупного соперника и до конца больше 50 ходов
+                //mySnake.getSize() > 5 && numberOfStep < 50) //Или с начала раунда прошло не более 50 ходов
                 && mySnake.getActOfPillFly() < dStone.getDistance(); //И не находится под действием пилюли полета
     }
 
